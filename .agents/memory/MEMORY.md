@@ -1,0 +1,1 @@
+- [OpenAPI integer compatibility](zod-integer-compatibility.md) — Orval/Zod version mismatch requires integer-like fields to use number + multipleOf: 1.

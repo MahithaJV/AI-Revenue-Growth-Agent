@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
-}
+export type TestOrderMode = typeof TestOrderMode[keyof typeof TestOrderMode];
+
+
+export const TestOrderMode = {
+  test: 'test',
+} as const;

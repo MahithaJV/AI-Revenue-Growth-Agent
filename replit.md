@@ -1,6 +1,6 @@
-# [Project name]
+# AI Revenue Growth Agent
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An explainable merchant copilot that finds catalog cross-sell opportunities, checks offer guardrails, and prepares safe test-mode commerce actions.
 
 ## Run & Operate
 
@@ -22,23 +22,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/revenue-growth-agent/src/` — React merchant command center and supporting routes.
+- `artifacts/api-server/src/routes/revenue.ts` — seeded revenue signals, agent orchestration, merchant rules, offer checks, and local Razorpay test-mode adapter.
+- `lib/api-spec/openapi.yaml` — source of truth for dashboard, catalog, analytics, activity, rules, offers, agent analysis, and test-order contracts.
+- `artifacts/revenue-growth-agent/src/index.css` — shared commerce intelligence cockpit theme.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first build uses a seeded in-memory merchant dataset to keep the hackathon demo self-contained and fast to reset.
+- Agent analysis returns an ordered tool trace and stops with explicit failed/blocked states when analytics is unavailable; it never fills in a missing signal.
+- Razorpay is represented by a local test-mode adapter unless the merchant explicitly connects a Razorpay account; the UI labels that boundary clearly.
+- Merchant discount, margin, approval, and offer-value rules are applied server-side before a recommendation can be acted on.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Command center for revenue health, active opportunities, and recent agent activity.
+- Goal-driven revenue scan with catalog, analytics, recommendation, offer-calculation, guardrail, and test-mode steps.
+- Catalog and analytics views for product signals, basket pairings, sales pulse, and category mix.
+- Searchable activity trace and editable merchant guardrails.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+No additional preferences recorded.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Standalone Vite builds need `PORT` and `BASE_PATH`; the managed web workflow supplies them automatically.
+- Razorpay is intentionally not called when no connection is active; local test orders include a note that no external request was sent.
 
 ## Pointers
 

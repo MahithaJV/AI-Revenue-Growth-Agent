@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface AgentAnalysisInput {
+  /** @minLength 3 */
+  goal: string;
+  /** @nullable */
+  productId: string | null;
+  simulateFailure: boolean;
 }

@@ -188,8 +188,8 @@ components:
         name: { type: string }
         category: { type: string }
         price: { type: number }
-        stock: { type: integer }
-        unitsSold: { type: integer }
+        stock: { type: number, multipleOf: 1 }
+        unitsSold: { type: number, multipleOf: 1 }
         revenue: { type: number }
         attachRate: { type: number }
         trend: { type: string, enum: [up, down, flat] }
@@ -200,12 +200,12 @@ components:
       properties:
         revenue: { type: number }
         revenueChange: { type: number }
-        orders: { type: integer }
+        orders: { type: number, multipleOf: 1 }
         ordersChange: { type: number }
         averageOrderValue: { type: number }
         aovChange: { type: number }
         opportunityValue: { type: number }
-        activeOpportunities: { type: integer }
+        activeOpportunities: { type: number, multipleOf: 1 }
         topProduct: { type: string }
         conversionRate: { type: number }
         periodLabel: { type: string }
@@ -231,7 +231,7 @@ components:
       properties:
         label: { type: string }
         revenue: { type: number }
-        orders: { type: integer }
+        orders: { type: number, multipleOf: 1 }
       required: [label, revenue, orders]
     Pairing:
       type: object
@@ -333,12 +333,12 @@ components:
     ToolTrace:
       type: object
       properties:
-        step: { type: integer }
+        step: { type: number, multipleOf: 1 }
         tool: { type: string }
         label: { type: string }
         status: { type: string, enum: [complete, running, failed, blocked] }
         detail: { type: string }
-        durationMs: { type: integer }
+        durationMs: { type: number, multipleOf: 1 }
       required: [step, tool, label, status, detail, durationMs]
     TestOrderInput:
       type: object
