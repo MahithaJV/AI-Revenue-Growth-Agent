@@ -1,22 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for the AI Revenue Growth Agent merchant demo.
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: revenue
+    description: Revenue intelligence operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +24,147 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [revenue]
+      summary: Get merchant dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /catalog:
+    get:
+      operationId: listCatalog
+      tags: [revenue]
+      summary: List merchant catalog items
+      responses:
+        "200":
+          description: Catalog items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [revenue]
+      summary: Get product and order analytics
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analytics"
+  /activity:
+    get:
+      operationId: listActivity
+      tags: [revenue]
+      summary: List recent agent activity
+      responses:
+        "200":
+          description: Activity entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+  /rules:
+    get:
+      operationId: getRules
+      tags: [revenue]
+      summary: Get merchant guardrails
+      responses:
+        "200":
+          description: Merchant rules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantRules"
+    put:
+      operationId: updateRules
+      tags: [revenue]
+      summary: Update merchant guardrails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MerchantRulesInput"
+      responses:
+        "200":
+          description: Updated merchant rules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantRules"
+  /offers/calculate:
+    post:
+      operationId: calculateOffer
+      tags: [revenue]
+      summary: Calculate a safe promotion for a product pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfferCalculationInput"
+      responses:
+        "200":
+          description: Calculated offer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferCalculation"
+  /agent/analyze:
+    post:
+      operationId: analyzeGoal
+      tags: [revenue]
+      summary: Run the agent against a merchant goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentAnalysisInput"
+      responses:
+        "200":
+          description: Agent recommendation and trace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentAnalysis"
+  /razorpay/test-order:
+    post:
+      operationId: createRazorpayTestOrder
+      tags: [revenue]
+      summary: Create a Razorpay test-mode order from a recommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestOrderInput"
+      responses:
+        "201":
+          description: Test-mode order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestOrder"
+        "503":
+          description: Test provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -31,6 +172,191 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
-
+      required: [status]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required: [error]
+    Product:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        price: { type: number }
+        stock: { type: integer }
+        unitsSold: { type: integer }
+        revenue: { type: number }
+        attachRate: { type: number }
+        trend: { type: string, enum: [up, down, flat] }
+        accent: { type: string }
+      required: [id, name, category, price, stock, unitsSold, revenue, attachRate, trend, accent]
+    Dashboard:
+      type: object
+      properties:
+        revenue: { type: number }
+        revenueChange: { type: number }
+        orders: { type: integer }
+        ordersChange: { type: number }
+        averageOrderValue: { type: number }
+        aovChange: { type: number }
+        opportunityValue: { type: number }
+        activeOpportunities: { type: integer }
+        topProduct: { type: string }
+        conversionRate: { type: number }
+        periodLabel: { type: string }
+      required: [revenue, revenueChange, orders, ordersChange, averageOrderValue, aovChange, opportunityValue, activeOpportunities, topProduct, conversionRate, periodLabel]
+    Analytics:
+      type: object
+      properties:
+        salesByDay:
+          type: array
+          items:
+            $ref: "#/components/schemas/SalesPoint"
+        pairings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pairing"
+        categoryMix:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryMix"
+      required: [salesByDay, pairings, categoryMix]
+    SalesPoint:
+      type: object
+      properties:
+        label: { type: string }
+        revenue: { type: number }
+        orders: { type: integer }
+      required: [label, revenue, orders]
+    Pairing:
+      type: object
+      properties:
+        primaryProduct: { type: string }
+        secondaryProduct: { type: string }
+        primaryId: { type: string }
+        secondaryId: { type: string }
+        attachRate: { type: number }
+        revenuePotential: { type: number }
+        signal: { type: string }
+      required: [primaryProduct, secondaryProduct, primaryId, secondaryId, attachRate, revenuePotential, signal]
+    CategoryMix:
+      type: object
+      properties:
+        category: { type: string }
+        revenue: { type: number }
+        share: { type: number }
+        color: { type: string }
+      required: [category, revenue, share, color]
+    Activity:
+      type: object
+      properties:
+        id: { type: string }
+        timestamp: { type: string }
+        action: { type: string }
+        detail: { type: string }
+        status: { type: string, enum: [success, running, blocked, failed] }
+        tool: { type: string }
+      required: [id, timestamp, action, detail, status, tool]
+    MerchantRules:
+      type: object
+      properties:
+        maxDiscountPercent: { type: number }
+        minMarginPercent: { type: number }
+        maxOfferValue: { type: number }
+        requireApproval: { type: boolean }
+        testModeOnly: { type: boolean }
+      required: [maxDiscountPercent, minMarginPercent, maxOfferValue, requireApproval, testModeOnly]
+    MerchantRulesInput:
+      type: object
+      properties:
+        maxDiscountPercent: { type: number, minimum: 0, maximum: 100 }
+        minMarginPercent: { type: number, minimum: 0, maximum: 100 }
+        maxOfferValue: { type: number, minimum: 0 }
+        requireApproval: { type: boolean }
+        testModeOnly: { type: boolean }
+      required: [maxDiscountPercent, minMarginPercent, maxOfferValue, requireApproval, testModeOnly]
+    OfferCalculationInput:
+      type: object
+      properties:
+        primaryProductId: { type: string }
+        secondaryProductId: { type: string }
+        requestedDiscountPercent: { type: number, minimum: 0, maximum: 100 }
+      required: [primaryProductId, secondaryProductId, requestedDiscountPercent]
+    OfferCalculation:
+      type: object
+      properties:
+        primaryProductId: { type: string }
+        secondaryProductId: { type: string }
+        primaryProduct: { type: string }
+        secondaryProduct: { type: string }
+        requestedDiscountPercent: { type: number }
+        approvedDiscountPercent: { type: number }
+        withinLimit: { type: boolean }
+        estimatedRevenueLift: { type: number }
+        estimatedOfferValue: { type: number }
+        explanation: { type: string }
+        status: { type: string, enum: [approved, capped, blocked] }
+      required: [primaryProductId, secondaryProductId, primaryProduct, secondaryProduct, requestedDiscountPercent, approvedDiscountPercent, withinLimit, estimatedRevenueLift, estimatedOfferValue, explanation, status]
+    AgentAnalysisInput:
+      type: object
+      properties:
+        goal: { type: string, minLength: 3 }
+        productId: { type: [string, "null"] }
+        simulateFailure: { type: boolean }
+      required: [goal, productId, simulateFailure]
+    AgentAnalysis:
+      type: object
+      properties:
+        id: { type: string }
+        goal: { type: string }
+        status: { type: string, enum: [complete, partial, failed] }
+        recommendation: { type: string }
+        headline: { type: string }
+        confidence: { type: number }
+        expectedLift: { type: number }
+        discountPercent: { type: number }
+        primaryProduct: { type: string }
+        secondaryProduct: { type: string }
+        primaryProductId: { type: string }
+        secondaryProductId: { type: string }
+        reasoning: { type: string }
+        trace:
+          type: array
+          items:
+            $ref: "#/components/schemas/ToolTrace"
+      required: [id, goal, status, recommendation, headline, confidence, expectedLift, discountPercent, primaryProduct, secondaryProduct, primaryProductId, secondaryProductId, reasoning, trace]
+    ToolTrace:
+      type: object
+      properties:
+        step: { type: integer }
+        tool: { type: string }
+        label: { type: string }
+        status: { type: string, enum: [complete, running, failed, blocked] }
+        detail: { type: string }
+        durationMs: { type: integer }
+      required: [step, tool, label, status, detail, durationMs]
+    TestOrderInput:
+      type: object
+      properties:
+        productId: { type: string }
+        companionProductId: { type: string }
+        discountPercent: { type: number, minimum: 0, maximum: 100 }
+      required: [productId, companionProductId, discountPercent]
+    TestOrder:
+      type: object
+      properties:
+        id: { type: string }
+        provider: { type: string }
+        mode: { type: string, enum: [test] }
+        status: { type: string, enum: [created, unavailable] }
+        amount: { type: number }
+        currency: { type: string }
+        displayAmount: { type: string }
+        note: { type: string }
+        createdAt: { type: string }
+      required: [id, provider, mode, status, amount, currency, displayAmount, note, createdAt]

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AI Revenue Growth Agent"
+description = "A merchant-facing AI revenue copilot that analyzes catalog and sales signals, explains its tool-calling workflow, and recommends safe cross-sells and bundles within merchant-defined discount rules."
+version = "1.0.0"
+id = "artifacts/revenue-growth-agent"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20110
+
+[services.development]
+run = "pnpm --filter @workspace/revenue-growth-agent run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/revenue-growth-agent", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/revenue-growth-agent/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20110"
+BASE_PATH = "/"
