@@ -47,3 +47,14 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+.replit
+.replitignore
+.replit-artifact/
+.conversation/
+.config/
+replit.md
+.npmrc
+
+# Build artifacts
+*.tsbuildinfo
+.tsbuildinfo
